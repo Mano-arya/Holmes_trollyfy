@@ -9,10 +9,11 @@ admin.site.site_title = "Trollyfy Moderator Portal"
 admin.site.index_title = "Platform Moderation & Management"
 
 
+
 # --- USER MODERATION & DATA INTEGRITY ---
 class CustomUserAdmin(UserAdmin):
     """
-    DATA INTEGRITY & AUDIT:
+    DATA INTEGRITY & AUDIT: 
     Enforces that 'email' and 'phone_number' are present.
     Makes critical identity and audit fields READ-ONLY during editing.
     """
@@ -144,4 +145,5 @@ class ChatRoomAdmin(admin.ModelAdmin):
     readonly_fields = ('participants', 'listing', 'created_at')
 
     def has_add_permission(self, request):
-        return False # Chats should only be created via the marketplace
+        return False # Chats should only be created via the holme marketplace
+#this is the end of the admin.py page
