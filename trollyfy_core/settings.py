@@ -20,8 +20,16 @@ ALLOWED_HOSTS = os.environ.get(
 ).split(",")
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://holmestrollyfy-x5vyooyf3q-km.a.run.app",
+    "https://holmestrollyfy-866789048793.australia-southeast2.run.app",
 ]
+
+SECURE_PROXY_SSL_HEADER = (
+    'HTTP_X_FORWARDED_PROTO',
+    'https'
+)
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # Applications
 INSTALLED_APPS = [
