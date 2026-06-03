@@ -33,39 +33,42 @@ class SignupView(CreateView):
     success_url = reverse_lazy('activation_sent')
 
     def form_valid(self, form):
-        # Create inactive user
-        user = form.save(commit=False)
-        user.is_active = False
-        user.save()
-    
-        current_site = get_current_site(self.request)
-    
-        subject = 'Activate Your Trollyfy Account'
-    
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-    
-        activation_link = (
-            f"https://{current_site.domain}"
-            f"{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
-        )
-    
-        message = (
-            f"Hi {user.username},\n\n"
-            f"Please click the link below to verify your account:\n\n"
-            f"{activation_link}"
-        )
-        print("EMAIL USER:", settings.DEFAULT_FROM_EMAIL)
+    user = form.save(commit=False)
+    user.is_active = False
+    user.save()
+
+    current_site = get_current_site(self.request)
+
+    subject = 'Activate Your Trollyfy Account'
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    activation_link = (
+        f"https://{current_site.domain}"
+        f"{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+    )
+
+    message = (
+        f"Hi {user.username},\n\n"
+        f"Please click the link below to verify your account:\n\n"
+        f"{activation_link}"
+    )
+
+    print("EMAIL USER:", settings.DEFAULT_FROM_EMAIL)
     print("SENDING EMAIL TO:", user.email)
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
+
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )
+
     print("EMAIL SENT SUCCESSFULLY")
-        return redirect('activation_sent')
+
+    return redirect('activation_sent')
 
 
 def activate_account(request, uidb64, token):
