@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',  # Required for Google Cloud Storage integration
 
     'marketplace',
 ]
@@ -48,9 +49,7 @@ AUTH_USER_MODEL = 'marketplace.User'
 # Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Efficiently serving static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -115,22 +114,24 @@ TIME_ZONE = 'Australia/Melbourne'
 USE_I18N = True
 USE_TZ = True
 
-# Static Files
+# Static Files (Managed by WhiteNoise)
 STATIC_URL = '/static/'
-
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
-
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
 STATICFILES_STORAGE = (
     'whitenoise.storage.CompressedManifestStaticFilesStorage'
 )
 
-# Media Files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Media Files (Managed by Google Cloud Storage)
+# Replace 'holmestrollyfy-media-bucket' with your actual GCS bucket name if it's different
+GS_BUCKET_NAME = os.environ.get("GS_BUCKET_NAME", "holmestrollyfy-media-bucket")
+
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_QUERYSTRING_AUTH = False  # Allows public URLs without expiration tokens
+GS_LOCATION = 'media'        # Places your uploads inside a /media/ folder in the bucket
+MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/{GS_LOCATION}/'
 
 # Default PK
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
