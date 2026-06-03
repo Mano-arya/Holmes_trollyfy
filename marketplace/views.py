@@ -32,38 +32,40 @@ class SignupView(CreateView):
     success_url = reverse_lazy('activation_sent')
 
     def form_valid(self, form):
-        # 1. Save user but set as inactive to prevent unauthorized login before verification
-        user = form.save(commit=False)
-        user.is_active = False 
-        user.save()
+    # Create inactive user
+    user = form.save(commit=False)
+    user.is_active = False
+    user.save()
 
-        # 2. Security: Generate a secure, one-time verification token and encoded UID
-        current_site = get_current_site(self.request)
-        subject = 'Activate Your Trollyfy Account'
-        
-        # We use urlsafe_base64_encode to securely pass the primary key in the URL
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        # default_token_generator creates a hash based on user state (timestamp, last login, etc.)
-        token = default_token_generator.make_token(user)
-        
-        # Build the dynamic activation link pointing to our 'activate' route
-        activation_link = f"http://{current_site.domain}{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+    # Generate verification token
+    current_site = get_current_site(self.request)
 
-        # 3. Security Audit Note: Emails are sent via the backend configured in settings.py
-        # In development, these are printed to the terminal console.
-        message = f"Hi {user.username},\n\nPlease click the link below to verify your account and start trading on campus:\n\n{activation_link}"
-        
-        print(f"ACTIVATION LINK: {activation_link}")
-    
-        send_mail(
-            subject,
-            message,
-            'noreply@trollyfy.com',
-            [user.email],
-            fail_silently=False,
-        )
-        
-        return redirect('activation_sent')
+    subject = 'Activate Your Trollyfy Account'
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    activation_link = (
+        f"https://{current_site.domain}"
+        f"{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+    )
+
+    message = (
+        f"Hi {user.username},\n\n"
+        f"Please click the link below to verify your account and start trading on campus:\n\n"
+        f"{activation_link}\n\n"
+        f"If you did not create this account, please ignore this email."
+    )
+
+    send_mail(
+        subject,
+        message,
+        'noreply@trollyfy.com',
+        [user.email],
+        fail_silently=False,
+    )
+
+    return redirect('activation_sent')
 
 
 def activate_account(request, uidb64, token):
