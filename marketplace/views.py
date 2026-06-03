@@ -25,7 +25,7 @@ from .forms import CustomUserCreationForm, ListingForm
 class SignupView(CreateView):
     """
     PHASE 3.5 SECURITY PATCH: Handles student registration with mandatory email verification.
-    This view ensures that 1) Users are created as 'Inactive' and 2) A unique, 
+    This view ensures that 1) Users are created as 'Inactive' and 2) A unique,
     one-time-use secure token is sent via email for verification.
     """
     form_class = CustomUserCreationForm
@@ -33,42 +33,43 @@ class SignupView(CreateView):
     success_url = reverse_lazy('activation_sent')
 
     def form_valid(self, form):
-    user = form.save(commit=False)
-    user.is_active = False
-    user.save()
+        user = form.save(commit=False)
+        user.is_active = False
+        user.save()
 
-    current_site = get_current_site(self.request)
+        current_site = get_current_site(self.request)
 
-    subject = 'Activate Your Trollyfy Account'
+        subject = 'Activate Your Trollyfy Account'
 
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
 
-    activation_link = (
-        f"https://{current_site.domain}"
-        f"{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
-    )
+        activation_link = (
+            f"https://{current_site.domain}"
+            f"{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+        )
 
-    message = (
-        f"Hi {user.username},\n\n"
-        f"Please click the link below to verify your account:\n\n"
-        f"{activation_link}"
-    )
+        message = (
+            f"Hi {user.username},\n\n"
+            f"Please click the link below to verify your account:\n\n"
+            f"{activation_link}\n\n"
+            f"If you did not create this account, please ignore this email."
+        )
 
-    print("EMAIL USER:", settings.DEFAULT_FROM_EMAIL)
-    print("SENDING EMAIL TO:", user.email)
+        print("EMAIL USER:", settings.DEFAULT_FROM_EMAIL)
+        print("SENDING EMAIL TO:", user.email)
 
-    send_mail(
-        subject,
-        message,
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email],
-        fail_silently=False,
-    )
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
 
-    print("EMAIL SENT SUCCESSFULLY")
+        print("EMAIL SENT SUCCESSFULLY")
 
-    return redirect('activation_sent')
+        return redirect('activation_sent')
 
 
 def activate_account(request, uidb64, token):
