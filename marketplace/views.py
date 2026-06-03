@@ -37,6 +37,34 @@ class SignupView(CreateView):
     user.is_active = False
     user.save()
 
+    current_site = get_current_site(self.request)
+
+    subject = 'Activate Your Trollyfy Account'
+
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+
+    activation_link = (
+        f"https://{current_site.domain}"
+        f"{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+    )
+
+    message = (
+        f"Hi {user.username},\n\n"
+        f"Please click the link below to verify your account:\n\n"
+        f"{activation_link}"
+    )
+
+    send_mail(
+        subject,
+        message,
+        EMAIL_HOST_USER,
+        [user.email],
+        fail_silently=False,
+    )
+
+    return redirect('activation_sent')
+
     # Generate verification token
     current_site = get_current_site(self.request)
 
