@@ -53,9 +53,7 @@ class SignupView(CreateView):
         # In development, these are printed to the terminal console.
         message = f"Hi {user.username},\n\nPlease click the link below to verify your account and start trading on campus:\n\n{activation_link}"
         
-        print("===================================")
-    print("ACTIVATION LINK:", activation_link)
-    print("===================================")
+        print(f"ACTIVATION LINK: {activation_link}")
     
         send_mail(
             subject,
