@@ -55,7 +55,8 @@ class SignupView(CreateView):
             f"Please click the link below to verify your account:\n\n"
             f"{activation_link}"
         )
-    
+        print("EMAIL USER:", settings.DEFAULT_FROM_EMAIL)
+    print("SENDING EMAIL TO:", user.email)
         send_mail(
             subject,
             message,
@@ -63,7 +64,7 @@ class SignupView(CreateView):
             [user.email],
             fail_silently=False,
         )
-    
+    print("EMAIL SENT SUCCESSFULLY")
         return redirect('activation_sent')
 
 
