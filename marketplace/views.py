@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.views.generic import CreateView, UpdateView, DeleteView, DetailView, TemplateView
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
+from django.conf import settings
 
 # Security & Email verification imports
 from django.core.mail import send_mail
@@ -32,38 +33,38 @@ class SignupView(CreateView):
     success_url = reverse_lazy('activation_sent')
 
     def form_valid(self, form):
-    # Create inactive user
-    user = form.save(commit=False)
-    user.is_active = False
-    user.save()
-
-    current_site = get_current_site(self.request)
-
-    subject = 'Activate Your Trollyfy Account'
-
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    token = default_token_generator.make_token(user)
-
-    activation_link = (
-        f"https://{current_site.domain}"
-        f"{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
-    )
-
-    message = (
-        f"Hi {user.username},\n\n"
-        f"Please click the link below to verify your account:\n\n"
-        f"{activation_link}"
-    )
-
-    send_mail(
-        subject,
-        message,
-        EMAIL_HOST_USER,
-        [user.email],
-        fail_silently=False,
-    )
-
-    return redirect('activation_sent')
+        # Create inactive user
+        user = form.save(commit=False)
+        user.is_active = False
+        user.save()
+    
+        current_site = get_current_site(self.request)
+    
+        subject = 'Activate Your Trollyfy Account'
+    
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+    
+        activation_link = (
+            f"https://{current_site.domain}"
+            f"{reverse('activate', kwargs={'uidb64': uid, 'token': token})}"
+        )
+    
+        message = (
+            f"Hi {user.username},\n\n"
+            f"Please click the link below to verify your account:\n\n"
+            f"{activation_link}"
+        )
+    
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+    
+        return redirect('activation_sent')
 
     # Generate verification token
     current_site = get_current_site(self.request)
